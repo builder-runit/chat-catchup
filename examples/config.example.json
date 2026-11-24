@@ -1,0 +1,38 @@
+{
+  "me": {
+    "names": [
+      "Alex Rivera",
+      "Alex"
+    ],
+    "sign_up_as": "Alex R.",
+    "email": "alex@example.com",
+    "teams": [
+      "Programming",
+      "Drive team"
+    ],
+    "keywords": [
+      "Saturday build"
+    ],
+    "availability_notes": "No Tuesdays. Away Dec 20 to Jan 3."
+  },
+  "google_account": "alex@example.com",
+  "spaces": {
+    "include": [],
+    "exclude": [
+      "Social"
+    ]
+  },
+  "lookback_days": 7,
+  "max_files_per_run": 40,
+  "output": {
+    "folder": "~/Documents/Chat Catchup",
+    "formats": [
+      "md",
+      "docx"
+    ]
+  },
+  "actions": {
+    "fill_sheets": "ask",
+    "chat_replies": "ask"
+  }
+}

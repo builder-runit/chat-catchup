@@ -1,0 +1,42 @@
+{
+  "title": "Chat Catch-up - Mon Nov 23",
+  "generated_at": "2026-11-23 08:05",
+  "period": {"from": "Nov 16", "to": "Nov 23"},
+  "tldr": [
+    "Build days are every Saturday in December. Programming needs two people for auto-routine work on Dec 6 and Dec 13.",
+    "Registration fee is due Friday. Mr. Patel needs your permission slip signed by then.",
+    "The Dec 20 outreach table still has no volunteers."
+  ],
+  "action_items": [
+    {"task": "Turn in signed permission slip to Mr. Patel", "due": "2026-11-27", "space": "Robotics - Announcements", "why": "Posted for all members; the trip is Dec 12.", "status": "todo"},
+    {"task": "Pay $40 registration fee", "due": "2026-11-28", "space": "Robotics - Announcements", "why": "Treasurer asked everyone to pay by Friday night.", "link": "https://docs.google.com/spreadsheets/d/EXAMPLE_FEES/edit", "status": "todo"},
+    {"task": "Bring a laptop with the robot code repo cloned", "due": "2026-12-06", "space": "Programming", "why": "Needed for the auto routine session.", "status": "todo"},
+    {"task": "Read the new scouting rubric", "space": "Strategy", "why": "Everyone scouting at the Dec 13 scrimmage should know it.", "link": "https://docs.google.com/document/d/EXAMPLE_RUBRIC/edit", "status": "todo"},
+    {"task": "Sign up sheet for Dec 6 filled in", "due": "2026-11-23", "space": "Programming", "status": "done"}
+  ],
+  "decisions_needed": [
+    {"question": "Can you do the Dec 20 outreach table at the library? It conflicts with the trip you mentioned.", "space": "Outreach", "why": "Sam asked specifically for people who can drive.", "link": "https://docs.google.com/spreadsheets/d/EXAMPLE_SIGNUP/edit"}
+  ],
+  "signups": [
+    {"what": "Auto routine coding", "sheet": "Fall Build Season - Sign-ups", "url": "https://docs.google.com/spreadsheets/d/EXAMPLE_SIGNUP/edit", "tab": "Sheet1", "cell": "D5", "value": "Alex R.", "status": "filled", "note": "Programming slot on Dec 6. Undo: clear the cell."},
+    {"what": "Auto routine testing", "sheet": "Fall Build Season - Sign-ups", "url": "https://docs.google.com/spreadsheets/d/EXAMPLE_SIGNUP/edit", "tab": "Sheet1", "cell": "D7", "value": "Alex R.", "status": "proposed", "note": "Programming slot on Dec 13. Say yes and it gets filled in."},
+    {"what": "Pit crew practice", "sheet": "Fall Build Season - Sign-ups", "tab": "Sheet1", "cell": "D8", "status": "already_listed"}
+  ],
+  "dates": [
+    {"when": "2026-12-06", "what": "Build day 1, 9am-1pm at school"},
+    {"when": "2026-12-12", "what": "Field trip to the regional demo", "space": "Robotics - Announcements"},
+    {"when": "2026-12-13", "what": "Scrimmage and pit crew practice"}
+  ],
+  "suggested_replies": [
+    {"space": "Programming", "in_reply_to": "Who has the swerve module code?", "draft": "It's in the main branch under /drive. I can walk someone through it on Saturday.", "status": "proposed"}
+  ],
+  "spaces": [
+    {"name": "Robotics - Announcements", "unread": 14, "summary": "Mostly logistics for the December trip and fees.", "highlights": ["Permission slips due Friday", "Fee sheet is open for edits"], "links": [{"title": "Fee tracker", "url": "https://docs.google.com/spreadsheets/d/EXAMPLE_FEES/edit", "kind": "sheet", "note": "You are not marked paid yet."}]},
+    {"name": "Programming", "unread": 52, "summary": "Debate about gyro vs. odometry for auto. Settled on gyro for now.", "highlights": ["Code review required before merging to main"]},
+    {"name": "Social", "unread": 130, "summary": "Mostly memes and pizza plans. Nothing needed from you."}
+  ],
+  "skipped": [
+    {"space": "Alumni mentors", "reason": "Excluded in your settings"}
+  ],
+  "notes": ["Sample digest for the README. Names, dates and links are made up."]
+}

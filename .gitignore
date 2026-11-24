@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+.venv/
+venv/
+.DS_Store
+
+# Personal data must never be committed: settings, the fill log, and generated digests.
+/config.json
+/state.json
+Chat Catch-up *.md
+Chat Catch-up *.docx
+!examples/sample-digest.md

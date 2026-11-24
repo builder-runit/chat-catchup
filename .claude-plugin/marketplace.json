@@ -1,0 +1,16 @@
+{
+  "name": "chat-catchup",
+  "owner": {
+    "name": "Chat Catch-up contributors"
+  },
+  "metadata": {
+    "description": "A skill that catches you up on all your Google Chats (built for robotics clubs) and writes one to-do digest."
+  },
+  "plugins": [
+    {
+      "name": "chat-catchup",
+      "source": "./",
+      "description": "Catch up on Google Chat for a club or team: reads missed chats, opens linked Sheets and Docs, finds what is yours, signs you up (with approval), and writes one to-do digest."
+    }
+  ]
+}
