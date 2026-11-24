@@ -9,6 +9,27 @@ from chatcatchup import config, state
 
 
 class ConfigTests(helpers.IsolatedHome):
+    def test_profile_answers_are_saved(self):
+        cfg = config.init(["Alex"], role="student", grade="10th grade", skills=["CAD", "Python"],
+                          interests=["outreach"], avoid=["food duty"], goals="18 outreach hours",
+                          fill_sheets="ask", digest_detail="short")
+        me = config.load()["me"]
+        self.assertEqual((me["role"], me["grade"], me["skills"]), ("student", "10th grade", ["CAD", "Python"]))
+        self.assertEqual((me["interests"], me["avoid"], me["goals"]), (["outreach"], ["food duty"], "18 outreach hours"))
+        self.assertEqual(config.load()["digest_detail"], "short")
+        self.assertEqual(cfg["actions"]["fill_sheets"], "ask")
+
+    def test_old_settings_files_still_load_with_profile_defaults(self):
+        config.write_json_atomic(config.config_path(), {"me": {"names": ["Alex"], "sign_up_as": "Alex"}})
+        cfg = config.load()
+        self.assertEqual((cfg["me"]["skills"], cfg["me"]["avoid"], cfg["digest_detail"]), ([], [], "full"))
+        self.assertEqual(config.validate(cfg), [])
+
+    def test_bad_digest_detail_is_rejected(self):
+        config.init(["Alex"])
+        with self.assertRaises(config.ConfigError):
+            config.set_value(config.load(), "digest_detail", "huge")
+
     def test_load_without_setup_explains_what_to_do(self):
         with self.assertRaises(config.ConfigError) as ctx:
             config.load()

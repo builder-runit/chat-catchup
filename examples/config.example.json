@@ -13,14 +13,27 @@
     "keywords": [
       "Saturday build"
     ],
-    "availability_notes": "No Tuesdays. Away Dec 20 to Jan 3."
+    "availability_notes": "No Tuesdays. Away Dec 20 to Jan 3.",
+    "role": "student",
+    "grade": "10th grade",
+    "skills": [
+      "CAD",
+      "Python"
+    ],
+    "interests": [
+      "outreach",
+      "scouting"
+    ],
+    "avoid": [
+      "food duty"
+    ],
+    "goals": "18 outreach hours and a spot on drive team"
   },
+  "digest_detail": "full",
   "google_account": "alex@example.com",
   "spaces": {
     "include": [],
-    "exclude": [
-      "Social"
-    ]
+    "exclude": []
   },
   "lookback_days": 7,
   "max_files_per_run": 40,

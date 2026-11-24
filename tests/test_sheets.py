@@ -46,6 +46,24 @@ class ScanTests(unittest.TestCase):
         self.assertNotIn("Name", first["context"])
         self.assertEqual(result["open_slot_count"], 4)
 
+    def test_avoided_kinds_are_blocked_and_never_offered(self):
+        result = sheets.scan(SAMPLE, ["Alex"], avoid=["outreach", "wiring"])
+        self.assertEqual([s["cell"] for s in result["open_slots"]], ["D5", "D7"])
+        self.assertEqual(result["open_slot_count"], 2)
+        blocked = {b["cell"]: b["blocked_by"] for b in result["blocked_slots"]}
+        self.assertEqual(blocked, {"D9": ["wiring"], "D10": ["outreach"]})
+
+    def test_wanted_kinds_are_listed_first_and_marked(self):
+        result = sheets.scan(SAMPLE, ["Alex"], interests=["outreach"])
+        self.assertEqual([s["cell"] for s in result["open_slots"]], ["D10", "D5", "D7", "D9"])
+        self.assertEqual(result["open_slots"][0]["matches_interest"], ["outreach"])
+        self.assertNotIn("matches_interest", result["open_slots"][1])
+
+    def test_without_preferences_nothing_is_blocked_or_reordered(self):
+        result = sheets.scan(SAMPLE, ["Alex"])
+        self.assertEqual(result["blocked_slots"], [])
+        self.assertEqual([s["cell"] for s in result["open_slots"]], ["D5", "D7", "D9", "D10"])
+
     def test_slot_with_nothing_describing_it_is_not_a_slot(self):
         text = "#\tA\tB\n1\tTask\tName\n2\tWiring\t\n3\t\t\n"
         self.assertEqual([s["cell"] for s in sheets.scan(text, ["Alex"])["open_slots"]], ["B2"])

@@ -18,6 +18,7 @@ from pathlib import Path
 FILL_MODES = ("ask", "auto", "off")
 REPLY_MODES = ("ask", "off")
 FORMATS = ("md", "docx")
+DETAIL_MODES = ("full", "short")
 
 DEFAULTS = {
     "me": {
@@ -32,7 +33,22 @@ DEFAULTS = {
         "keywords": [],
         # Free text Claude uses before it signs you up for anything, e.g. "No Tuesdays. Away Dec 20-Jan 3."
         "availability_notes": "",
+        # --- profile (from the first-run questions; they make the results fit you) ---
+        # Your standing, because rules often differ: "student", "student leader", "mentor", "parent", ...
+        "role": "",
+        # Grade or year, e.g. "10th grade"; some deadlines and hour requirements depend on it.
+        "grade": "",
+        # Things you can do or want to learn, e.g. ["CAD", "Python", "scouting", "outreach"]
+        "skills": [],
+        # Kinds of things you WANT to be signed up for. Slots that match are listed first.
+        "interests": [],
+        # Kinds of things you never want, e.g. ["food duty", "teardown"]. Matching slots are never offered.
+        "avoid": [],
+        # What you are trying to get out of the season, e.g. "18 outreach hours, join drive team".
+        "goals": "",
     },
+    # "full" = every chat summarised; "short" = to-do list, decisions and dates first, chats in one line each
+    "digest_detail": "full",
     # The Google account your club chats live in (helps when several accounts are signed in).
     "google_account": "",
     "spaces": {"include": [], "exclude": []},
@@ -121,7 +137,7 @@ def validate(cfg: dict) -> list:
         problems.append("me.names is empty - add at least one name people call you")
     if not str(me.get("sign_up_as", "")).strip():
         problems.append("me.sign_up_as is empty - this is the text typed into sign-up sheets")
-    for key in ("names", "teams", "keywords"):
+    for key in ("names", "teams", "keywords", "skills", "interests", "avoid"):
         if not _is_str_list(me.get(key, [])):
             problems.append(f"me.{key} must be a list of text values")
     spaces = cfg.get("spaces", {})
@@ -137,6 +153,8 @@ def validate(cfg: dict) -> list:
         problems.append(f"actions.fill_sheets must be one of {', '.join(FILL_MODES)}")
     if actions.get("chat_replies") not in REPLY_MODES:
         problems.append(f"actions.chat_replies must be one of {', '.join(REPLY_MODES)}")
+    if cfg.get("digest_detail") not in DETAIL_MODES:
+        problems.append(f"digest_detail must be one of {', '.join(DETAIL_MODES)}")
     formats = cfg.get("output", {}).get("formats", [])
     if not _is_str_list(formats) or not formats or any(f not in FORMATS for f in formats):
         problems.append(f"output.formats must be a non-empty list drawn from {', '.join(FORMATS)}")
@@ -146,7 +164,9 @@ def validate(cfg: dict) -> list:
 
 
 def init(names, *, sign_up_as=None, email="", account="", teams=(), keywords=(),
-         folder=None, lookback_days=None, force=False) -> dict:
+         folder=None, lookback_days=None, force=False, role="", grade="", skills=(),
+         interests=(), avoid=(), goals="", fill_sheets=None, chat_replies=None,
+         digest_detail=None) -> dict:
     names = [n.strip() for n in names if n and n.strip()]
     if not names:
         raise ConfigError("Give at least one name, e.g. --name \"Alex\"")
@@ -159,7 +179,19 @@ def init(names, *, sign_up_as=None, email="", account="", teams=(), keywords=(),
         email=email.strip(),
         teams=[t.strip() for t in teams if t.strip()],
         keywords=[k.strip() for k in keywords if k.strip()],
+        role=role.strip(),
+        grade=grade.strip(),
+        skills=[x.strip() for x in skills if x.strip()],
+        interests=[x.strip() for x in interests if x.strip()],
+        avoid=[x.strip() for x in avoid if x.strip()],
+        goals=goals.strip(),
     )
+    if fill_sheets:
+        cfg["actions"]["fill_sheets"] = fill_sheets
+    if chat_replies:
+        cfg["actions"]["chat_replies"] = chat_replies
+    if digest_detail:
+        cfg["digest_detail"] = digest_detail
     cfg["google_account"] = account.strip()
     if folder:
         cfg["output"]["folder"] = folder

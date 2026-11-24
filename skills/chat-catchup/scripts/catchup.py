@@ -54,6 +54,11 @@ def cmd_doctor(args) -> None:
             folder = config.output_folder(cfg)
             report["output_folder"] = str(folder)
             report["output_folder_exists"] = folder.exists()
+            me = cfg["me"]
+            if not (me["role"] or me["skills"] or me["interests"] or me["teams"]):
+                report["hints"].append(
+                    "Your profile is empty (role, subteam, skills, interests). Ask the user the profile questions "
+                    "in references/setup-interview.md: it makes the sign-ups and the digest fit them.")
         except config.ConfigError as exc:
             report["problems"].append(str(exc))
     report["ok"] = not report["problems"]
@@ -68,6 +73,9 @@ def cmd_config(args) -> None:
             args.name, sign_up_as=args.sign_up_as, email=args.email or "", account=args.account or "",
             teams=args.team, keywords=args.keyword, folder=args.folder,
             lookback_days=args.lookback_days, force=args.force,
+            role=args.role or "", grade=args.grade or "", skills=args.skill, interests=args.interest,
+            avoid=args.avoid, goals=args.goals or "", fill_sheets=args.fill_sheets,
+            chat_replies=args.chat_replies, digest_detail=args.digest_detail,
         )
         out({"saved": str(config.config_path()), "config": cfg})
     elif args.config_cmd == "show":
@@ -103,16 +111,18 @@ def cmd_links(args) -> None:
 
 
 def cmd_sheet_scan(args) -> None:
-    names, email, teams, keywords = list(args.name), args.email or "", [], []
+    names, email, teams, keywords, interests, avoid = list(args.name), args.email or "", [], [], [], []
     try:
         me = config.load()["me"]
         names += me["names"]
         email = email or me["email"]
         teams, keywords = me["teams"], me["keywords"]
+        interests, avoid = me["interests"], me["avoid"]
     except config.ConfigError:
         if not names:
             raise config.ConfigError("No settings yet: run `config init`, or pass --name \"Your Name\"")
-    result = sheets.scan(read_text(args.file), names, [email] if email else [], teams, keywords, args.max_slots)
+    result = sheets.scan(read_text(args.file), names, [email] if email else [], teams, keywords, args.max_slots,
+                         interests=interests, avoid=avoid)
     if args.url:
         result["url"] = args.url
     if args.tab:
@@ -153,6 +163,15 @@ def build_parser() -> argparse.ArgumentParser:
     ci.add_argument("--account", help="the Google account your club chats live in")
     ci.add_argument("--team", action="append", default=[], help="subteam or role (repeatable)")
     ci.add_argument("--keyword", action="append", default=[], help="always-relevant word or phrase (repeatable)")
+    ci.add_argument("--role", help='your standing: "student", "student leader", "mentor", ...')
+    ci.add_argument("--grade", help="grade or year")
+    ci.add_argument("--skill", action="append", default=[], help="something you can do or want to learn (repeatable)")
+    ci.add_argument("--interest", action="append", default=[], help="a kind of sign-up you WANT (repeatable)")
+    ci.add_argument("--avoid", action="append", default=[], help="a kind of sign-up you never want (repeatable)")
+    ci.add_argument("--goals", help="what you want out of the season")
+    ci.add_argument("--fill-sheets", choices=config.FILL_MODES, help="ask (default), auto, or off")
+    ci.add_argument("--chat-replies", choices=config.REPLY_MODES, help="ask (default) or off")
+    ci.add_argument("--digest-detail", choices=config.DETAIL_MODES, help="full (default) or short")
     ci.add_argument("--folder", help="where digests are saved")
     ci.add_argument("--lookback-days", type=int)
     ci.add_argument("--force", action="store_true", help="overwrite existing settings")

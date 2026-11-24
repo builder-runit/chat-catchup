@@ -108,13 +108,13 @@ def _context(letters, headers, cells, skip=()) -> dict:
     return out
 
 
-def scan(text: str, names, emails=(), teams=(), keywords=(), max_slots: int = 50) -> dict:
+def scan(text: str, names, emails=(), teams=(), keywords=(), max_slots: int = 50, interests=(), avoid=()) -> dict:
     grid = parse_grid(text)
     rows = [(n, cells) for n, cells in grid.rows if any(cells)]
     result = {
         "rows_with_data": len(rows), "columns": grid.letters, "header_row": None,
         "name_columns": [], "matches": [], "listed_in_name_column": False,
-        "open_slots": [], "open_slot_count": 0, "append_slots": [], "notes": [],
+        "open_slots": [], "open_slot_count": 0, "blocked_slots": [], "append_slots": [], "notes": [],
     }
     if not rows:
         result["notes"].append("The sheet is empty.")
@@ -138,7 +138,8 @@ def scan(text: str, names, emails=(), teams=(), keywords=(), max_slots: int = 50
 
     # --- where am I mentioned? ---
     groups = [("name", _term_patterns(names)), ("email", _term_patterns(emails)),
-              ("team", _term_patterns(teams)), ("keyword", _term_patterns(keywords))]
+              ("team", _term_patterns(teams)), ("keyword", _term_patterns(keywords)),
+              ("interest", _term_patterns(interests))]
     for number, cells in rows:
         for i, value in enumerate(cells):
             if not value:
@@ -157,6 +158,12 @@ def scan(text: str, names, emails=(), teams=(), keywords=(), max_slots: int = 50
                 result["listed_in_name_column"] = True
 
     # --- where could I sign up? ---
+    avoid_patterns, interest_patterns = _term_patterns(avoid), _term_patterns(interests)
+
+    def _hits(patterns, context, cells):
+        text = " ".join(list(context.values()) + [c for c in cells if c])
+        return [t for t, p in patterns if p.search(text)]
+
     for number, cells in data_rows:
         for i in name_idx:
             if cells[i]:
@@ -164,11 +171,21 @@ def scan(text: str, names, emails=(), teams=(), keywords=(), max_slots: int = 50
             context = _context(grid.letters, headers, cells, skip=name_idx)
             if not context:
                 continue  # nothing describes this row, so it is not a slot, just blank space
+            cell = f"{grid.letters[i]}{number}"
+            blocked_by = _hits(avoid_patterns, context, cells)
+            if blocked_by:
+                # The user said they never want this kind of thing: report it, never offer it.
+                result["blocked_slots"].append({"cell": cell, "column": headers[i], "context": context, "blocked_by": blocked_by})
+                continue
             result["open_slot_count"] += 1
-            if len(result["open_slots"]) < max_slots:
-                result["open_slots"].append(
-                    {"cell": f"{grid.letters[i]}{number}", "column": headers[i], "context": context}
-                )
+            slot = {"cell": cell, "column": headers[i], "context": context}
+            wanted = _hits(interest_patterns, context, cells)
+            if wanted:
+                slot["matches_interest"] = wanted
+            result["open_slots"].append(slot)
+    # Slots that match what the user wants come first; keep the sheet order otherwise.
+    result["open_slots"].sort(key=lambda sl: 0 if sl.get("matches_interest") else 1)
+    del result["open_slots"][max_slots:]
     for i in name_idx:
         filled = [n for n, cells in data_rows if cells[i]]
         if filled:

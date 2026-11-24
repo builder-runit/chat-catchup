@@ -105,6 +105,23 @@ class CliTests(helpers.IsolatedHome):
         self.assertEqual(proc.returncode, 1)
         return proc.stderr
 
+    def test_setup_interview_answers_flow_into_scan(self):
+        self.run_cli("config", "init", "--name", "Alex", "--role", "student", "--grade", "10th",
+                     "--skill", "CAD", "--interest", "programming", "--avoid", "outreach",
+                     "--goals", "join drive team", "--fill-sheets", "ask", "--digest-detail", "short",
+                     "--folder", str(self.home / "out"))
+        shown = self.run_cli("config", "show")["config"]
+        self.assertEqual((shown["me"]["role"], shown["me"]["avoid"], shown["digest_detail"]), ("student", ["outreach"], "short"))
+        self.assertTrue(self.run_cli("doctor")["ok"])
+        sheet = helpers.EXAMPLES / "sample-signup-sheet.tsv"
+        result = self.run_cli("sheet-scan", "--file", str(sheet))
+        self.assertEqual([s["cell"] for s in result["open_slots"]][:2], ["D5", "D7"])   # programming first
+        self.assertEqual([b["cell"] for b in result["blocked_slots"]], ["D10"])         # outreach never offered
+
+    def test_empty_profile_gets_a_hint(self):
+        self.run_cli("config", "init", "--name", "Alex", "--folder", str(self.home / "out"))
+        self.assertTrue(any("profile is empty" in h for h in self.run_cli("doctor")["hints"]))
+
     def test_full_first_run_flow(self):
         self.assertFalse(self.run_cli("doctor")["ok"])
         self.run_cli("config", "init", "--name", "Alex", "--name", "Al", "--sign-up-as", "Alex R.",

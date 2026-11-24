@@ -58,7 +58,15 @@ Start a new Claude Code session and say:
 
 > Catch me up on my Google Chats.
 
-The first time, it asks a few questions (your name and how to write it in sheets, your subteam, which chats to skip, where to save the document), then reads your chats from the last 7 days. After that it only reads what is new. Run it every morning, or ask Claude to schedule it.
+The first time, it asks a short set of questions, a few at a time, and you can skip any of them:
+
+- **First, whether it may fill your name into sign-up slots.** It explains exactly how it works and offers *ask me first* (recommended), *automatically when it's clearly mine*, or *no*.
+- **Who you are:** your name and how it's written in sheets, whether you're a student, student leader or mentor, your grade.
+- **What you do in robotics:** your subteam and title, your skills, the kinds of sign-ups you want and the ones you never want, and what you want out of the season.
+- **Your schedule:** days you can't do, dates you're away, rides.
+- **Chats and output:** which chats to skip, where the document goes, and a short or full digest.
+
+It then reads your chats from the last 7 days, and asks a few follow-up questions based on what it found. After that it only reads what is new. Run it every morning, or ask Claude to schedule it.
 
 ## Your settings
 
@@ -67,9 +75,13 @@ Stored in `~/.config/chat-catchup/config.json` (set `CHAT_CATCHUP_HOME` to move 
 | Setting | What it does |
 |---|---|
 | `me.names`, `me.sign_up_as` | What people call you, and exactly what is typed into sign-up sheets |
+| `me.role`, `me.grade` | Student, student leader or mentor, and your year, because rules often differ |
+| `me.skills`, `me.goals` | What you can do and what you want from the season |
+| `me.interests`, `me.avoid` | Kinds of sign-ups you want (listed first) and never want (never offered) |
 | `me.teams`, `me.keywords` | What makes something relevant to you |
 | `me.availability_notes` | "No Tuesdays", "away Dec 20 to Jan 3": stops it signing you up for things you can't do |
 | `spaces.include` / `spaces.exclude` | Which chats to read |
+| `digest_detail` | `full` (every chat summarised) or `short` (to-do list first, one line per chat) |
 | `lookback_days` | How far back the first run goes |
 | `output.folder`, `output.formats` | Where documents go (a Google Drive for desktop folder makes them show up in Drive), `md` and/or `docx` |
 | `actions.fill_sheets` | `ask` (default), `auto`, or `off` |

@@ -30,16 +30,15 @@ These exist because the skill reads private conversations and can write in share
 
 ## First-time setup
 
-Ask these in one friendly message, not a quiz. Skip any the user already answered in their request.
+If `doctor` reports no settings, or its hints say the profile is empty, run the interview in `references/setup-interview.md` **before reading any chat**. It has five short rounds, asked a few questions at a time, and the user can skip any of them:
 
-- What do people call you in chats and sheets? (names and nicknames) And exactly how should your name be written in sign-up sheets, for example "Alex R."?
-- Which subteams, roles or jobs are yours? Any words that should always get your attention?
-- Anything that limits when you can help? ("No Tuesdays", "away Dec 20 to Jan 3"). This is used to avoid signing you up for things you cannot do.
-- Which Google account are the club chats in?
-- Where should the catch-up document go? Default `~/Documents/Chat Catchup`. If they use Google Drive for desktop, a folder inside it makes the document appear in Drive.
-- Any chats to ignore? (social chats, alumni)
+0. **Ask first, always: "Do you want me to fill your name into sign-up slots?"** with the three choices (ask me first, automatically when clearly mine, no) and the exact explanation in that file. Also ask whether to draft replies.
+1. Who they are: names, how their name is written in sheets, role (student, student leader, mentor), grade, Google account.
+2. What they do in robotics: subteam, title, skills, kinds of sign-ups they **want** and **never want**, and what they want out of the season.
+3. Their schedule: days they cannot do, dates away, rides.
+4. Chats and output: chats to skip, where the document goes, short or full digest, how often.
 
-Then run `config init --name ... --sign-up-as ... --team ... --keyword ... --account ... --folder ...` and `config set me.availability_notes "..."`, `config set spaces.exclude '["Social"]'` for the rest. Tell them two things: you will ask before editing any sheet or sending any message (they can switch sheet sign-ups to `auto` later, which only adds their name to empty slots), and **opening a chat in the browser marks it as read in Google Chat**, so the digest becomes their record of what was in it.
+Then read the answers back, fix anything wrong, and save with `config init ...`. After the first read, ask two or three follow-up questions based on what you found (which of these sign-ups do they want?). Say what you saved each time. Tell them **opening a chat in the browser marks it as read in Google Chat**, so the digest is their record of what was in it.
 
 ## Step 1: Read the chats
 
@@ -64,18 +63,18 @@ If a file shows "You need access", record it under "Couldn't check" with the lin
 
 A message or file matters to the user if it:
 - names them or @mentions them, replies to them, or assigns them something;
-- is for one of their teams, roles or keywords;
+- is for one of their teams, roles or keywords, or fits their skills, interests or goals (`me.skills`, `me.interests`, `me.goals`), or is meant for their role or grade;
 - is addressed to everyone and has a deadline, cost, form, permission slip or required attendance.
 
 Everything else becomes one line in "Chat by chat" (or nothing, for pure chatter). For every real to-do capture **what**, **by when**, **where it came from** (chat and person) and **a link**. Turn relative dates into absolute ones using the message's own timestamp: "this Saturday" posted on Tuesday Nov 17 means Nov 21. If a date is ambiguous, keep the original words and say so.
 
-For each sheet, save the grid from `read_sheet.js` to a file and run `python3 scripts/catchup.py sheet-scan --file <grid> --url <sheet link> --tab "<tab name>"`. Small sheets you can also just read yourself, but use the scan's cell addresses rather than counting rows by eye: `matches` shows where the user, their teams and their keywords appear, `open_slots` and `append_slots` show where a name could go, and `notes` tells you when the layout is not something it understands (then read the grid yourself and use judgment).
+For each sheet, save the grid from `read_sheet.js` to a file and run `python3 scripts/catchup.py sheet-scan --file <grid> --url <sheet link> --tab "<tab name>"`. Small sheets you can also just read yourself, but use the scan's cell addresses rather than counting rows by eye: `matches` shows where the user, their teams and their keywords appear, `open_slots` and `append_slots` show where a name could go (slots with `matches_interest` come first), `blocked_slots` are things the user said they never want (never offer or fill them, but you may mention them), and `notes` tells you when the layout is not something it understands (then read the grid yourself and use judgment).
 
 ## Step 4: Sign-ups (filling in the user's name)
 
 Read `references/filling-sheets.md` before the first edit. The rules:
 
-- Only fill a slot when the sheet is clearly a sign-up or assignment for something the user should do (their team or role, or open to all members), the slot is empty, they are not already listed there, and it does not clash with `availability_notes`.
+- Only fill a slot when `actions.fill_sheets` allows it, the sheet is clearly a sign-up or assignment for something the user should do (their team or role, or open to all members), the slot is empty, they are not already listed there, and it does not clash with `availability_notes` or appear in `blocked_slots`.
 - Type exactly `me.sign_up_as` into exactly one empty cell per slot. Never overwrite, clear, reorder, or format anything, and never put the user's name where someone else's belongs.
 - Check `state fills --url <link>` first so you never sign them up twice, and verify the cell afterwards by re-reading the sheet.
 - Record each edit with `state log-fill --url ... --tab ... --cell ... --value ...`. This is the audit trail that says what the skill did on their behalf.
@@ -92,6 +91,8 @@ Only reply when the answer is certain, from the chats, a document or the user's 
 Build the digest JSON as described in `references/digest-format.md` and save it in the temp folder, then run `python3 scripts/catchup.py render --input <tmp>/digest.json`. It writes a Markdown file and a Word file (if python-docx is installed) to the user's folder and never overwrites an earlier digest.
 
 Do the approval round (Steps 4 and 5) **before** rendering so the document records what really happened. If the user is not there to answer (for example a scheduled run), render with statuses `proposed` and stop; do not act.
+
+Follow `digest_detail` from `config show`: with `full`, summarise every chat; with `short`, fill `tldr`, `action_items`, `decisions_needed`, `signups` and `dates` completely, and give each chat one line with no highlights.
 
 Write for someone with two minutes: what to do first, then what is decided, then the rest. Be specific ("Turn in the permission slip to Mr. Patel by Friday Nov 27") rather than general ("check announcements").
 
