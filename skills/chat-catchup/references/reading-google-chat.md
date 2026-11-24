@@ -6,8 +6,8 @@ Google Chat's web app is a heavy single-page app and its layout changes often. T
 
 ## Open it
 
-1. Call `tabs_context` first to see what is open, then create a **new tab** for Chat. Never navigate the user's existing tabs.
-2. Go to `https://chat.google.com/`. To choose an account, use `https://chat.google.com/?authuser=<the account email from settings>`. Gmail's built-in Chat (`mail.google.com/chat`) is the same app.
+1. Call `tabs_context` first to see what is open. If the user already has Google Chat open (`chat.google.com` or `mail.google.com/chat`) and it is signed in, **use that tab**: this is the easy path, the user only has to open Chat and say "catch me up". Do not navigate any other tab of theirs. If Chat is not open, create a **new tab** for it.
+2. In a new tab, go to `https://chat.google.com/`. To choose an account, use `https://chat.google.com/?authuser=<the account email from settings>`. Gmail's built-in Chat (`mail.google.com/chat`) is the same app. If Google shows a sign-in page, stop and ask the user to sign in themselves in that tab, then continue. Never type a password or work around a sign-in page.
 3. Check the account. Take a screenshot and look at the profile picture at the top right, or hover it. If it is not the account in `google_account`, stop and ask the user. Do not read the wrong person's chats.
 
 ## Find the chats

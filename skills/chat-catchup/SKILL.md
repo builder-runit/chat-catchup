@@ -45,7 +45,7 @@ Then run `config init --name ... --sign-up-as ... --team ... --keyword ... --acc
 
 Follow `references/reading-google-chat.md` for the browser steps. In short:
 
-- Open Google Chat in a **new tab** so the user's own tabs are untouched. Use the right Google account.
+- If the user already has Google Chat open and signed in, work in that tab. Otherwise open it in a **new tab** and leave their other tabs untouched. Use the right Google account.
 - List the spaces and direct messages. Check Mentions first so no @mention is missed. Apply `spaces.include` / `spaces.exclude`.
 - For each chat, get the start time with `state since --space "<name>"` (the last time it was handled, or `lookback_days` ago on the first run). Read everything after that, including thread replies.
 - For each message record `space`, `sender`, `time` (ISO-8601), `text`, and `links`. Page text drops the real addresses behind link text, so run `scripts/browser/collect_links.js` on each chat view and attach the results.
