@@ -64,20 +64,43 @@ const result = await (async () => {
     if (res.status !== 200 || at < 0) return {ok: false, error: 'tab_unreadable', status: res.status, tabs: tabs.map(({name, gid}) => ({name, gid}))};
     const table = res.text.slice(at, res.text.indexOf('</table>', at));
     const head = (table.match(/<thead>[\s\S]*?<\/thead>/) || [''])[0];
-    const letters = [...head.matchAll(/<th id="[^"]*C\d+"[^>]*>([^<]*)<\/th>/g)].map(m => m[1].trim());
-    const rows = [], links = [];
+    // Google puts a "freezebar" spacer cell between frozen and scrolling columns, in the header
+    // and in every row. It is not a column, so it must not be counted (counting it shifted every
+    // letter on sheets with a frozen column). Letters come from the header, so hidden columns
+    // are skipped correctly (A, then EM...).
+    const FREEZE = /class="[^"]*freezebar-cell/;
+    const sides = [[], []]; let side = 0;
+    for (const th of head.matchAll(/<th\b([^>]*)>([\s\S]*?)<\/th>/g)) {
+      if (FREEZE.test(th[1])) { side = 1; continue; }
+      if (/\bid="[^"]*C\d+"/.test(th[1])) sides[side].push(decode(th[2].replace(/<[^>]+>/g, '')).trim());
+    }
+    const letters = [...sides[0], ...sides[1]];
+    const rows = [], links = [], uncertain = [];
+    const span = attrs => Number((/colspan="(\d+)"/.exec(attrs) || [0, 1])[1]);
     for (const tr of table.matchAll(/<tr[^>]*>([\s\S]*?)<\/tr>/g)) {
       const num = /<th[^>]*id="[^"]*R\d+"[^>]*>\s*<div[^>]*>(\d+)<\/div>/.exec(tr[1]);
       if (!num) continue;                                   // skips the frozen-row spacer lines
-      let col = 0; const cells = [];
+      const parts = [[], []]; let part = 0;                 // cells before / after the freezebar
       for (const td of tr[1].matchAll(/<td\b([^>]*)>([\s\S]*?)<\/td>/g)) {
-        let inner = td[2];
-        inner = inner.replace(/<a\b[^>]*href="([^"]*)"[^>]*>/gi, (_, h) => {
-          links.push({cell: `${letters[col] || colLetters(col)}${num[1]}`, href: unwrap(decode(h))}); return '';
-        });
-        cells[col] = decode(inner.replace(/<br\s*\/?>/gi, '\n').replace(/<[^>]+>/g, '')).trim();
-        col += Number((/colspan="(\d+)"/.exec(td[1]) || [0, 1])[1]);
+        if (FREEZE.test(td[1])) { part = 1; continue; }
+        parts[part].push({attrs: td[1], html: td[2]});
       }
+      const cells = Array(letters.length).fill('');
+      let sure = true;
+      parts.forEach((list, si) => {
+        // A side with no cells is simply empty. A side with the wrong number of cells means some
+        // cell was left out and we cannot tell which one, so the row's addresses are not trusted.
+        if (list.length && list.reduce((n, c) => n + span(c.attrs), 0) !== sides[si].length) sure = false;
+        let col = si === 0 ? 0 : sides[0].length;
+        for (const c of list) {
+          const inner = c.html.replace(/<a\b[^>]*href="([^"]*)"[^>]*>/gi, (_, h) => {
+            links.push({cell: `${letters[col] || colLetters(col)}${num[1]}`, href: unwrap(decode(h))}); return '';
+          });
+          cells[col] = decode(inner.replace(/<br\s*\/?>/gi, '\n').replace(/<[^>]+>/g, '')).trim();
+          col += span(c.attrs);
+        }
+      });
+      if (!sure) uncertain.push(Number(num[1]));
       if (cells.some(c => c)) rows.push([Number(num[1]), cells]);
     }
     const width = Math.max(letters.length, ...rows.map(r => r[1].length), 0);
@@ -87,6 +110,8 @@ const result = await (async () => {
       ok: true, id: SHEET_ID, source: 'htmlview',
       tabs: tabs.map(({name, gid}) => ({name, gid})), tab: {name: tab.name, gid: tab.gid},
       rows: rows.length, truncated: rows.length > shown.length,
+      frozen_columns: side === 1 ? sides[0].length : 0,
+      uncertain_rows: uncertain,   // row numbers whose cells could not be matched to letters safely: never write into these without checking on screen
       grid: ['#\t' + letters.join('\t'), ...shown.map(([n, c]) => n + '\t' + Array.from({length: width}, (_, i) => clean(c[i] || '')).join('\t'))].join('\n'),
       links,
     };

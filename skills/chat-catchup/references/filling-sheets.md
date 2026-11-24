@@ -10,6 +10,7 @@ All of these must be true. If any is not, do not edit; report it in the digest i
 
 - `actions.fill_sheets` allows it (`ask` and the user said yes, or `auto` and the case is clear).
 - The sheet really is a sign-up or assignment for something the user should do. Check the chat message that shared it, not just the sheet.
+- The target row is not in `uncertain_rows` from `read_sheet.js`. If it is, look at the row on screen and use the cell you can see, or skip it and report it in the digest.
 - The slot is empty **right now** (re-read the sheet just before typing: other people edit at the same time).
 - The user is not already listed for it (`listed_in_name_column`, `matches`) and `state fills --url <link>` shows no earlier fill for that cell.
 - It does not clash with `me.availability_notes`, and the sheet's own rules allow it ("max 2 per team", "seniors only").

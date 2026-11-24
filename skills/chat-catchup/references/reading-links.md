@@ -24,6 +24,7 @@ Why a script: Google Sheets draws its grid on a canvas, so `get_page_text` on a 
    - `tabs`: every tab's name and gid. If the sheet has several tabs, look at the ones that sound relevant (sign-ups, schedule, roster), not necessarily all.
    - `grid`: tab-separated text. The first line is `#<TAB>A<TAB>B...` and each row starts with its real row number. Empty rows are left out, which is why the numbers can skip.
    - `links`: addresses behind links inside cells.
+   - `uncertain_rows`: row numbers where a cell was left out of Google's page, so the cells cannot be matched to column letters with certainty. Read those rows on screen, and never write into them without checking. `frozen_columns` is how many columns are frozen. Hidden columns are skipped, so letters can jump (A, then EM).
    - `truncated`: true if there were more than 500 rows. Re-run with a different tab or tell the user.
    - On failure, `ok: false` and `error`. `no_access_or_not_found` means the signed-in account cannot see the sheet.
 4. Save `grid` to a file and run `scripts/catchup.py sheet-scan --file <that file> --url <link> --tab "<tab name>"`. See SKILL.md Step 3 for what to do with the result.

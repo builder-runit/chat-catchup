@@ -112,6 +112,16 @@ def _key(info: dict):
     return (info["kind"], info["url"])
 
 
+def _link_text(item) -> str:
+    """A link from collect_links.js is {href, text, gid?} (query string already removed);
+    older callers pass plain strings. Put a separate gid back as #gid=N so the tab is kept."""
+    if isinstance(item, dict):
+        href = str(item.get("href", ""))
+        gid = item.get("gid")
+        return f"{href}#gid={gid}" if gid and "gid=" not in href else href
+    return str(item)
+
+
 def collect(messages: list) -> list:
     """Messages -> unique links, sheets first. Each message: {text, links?, space?, sender?, time?}.
 
@@ -121,7 +131,7 @@ def collect(messages: list) -> list:
     for message in messages:
         if not isinstance(message, dict):
             continue
-        blob = " ".join([str(message.get("text", ""))] + [str(u) for u in message.get("links", [])])
+        blob = " ".join([str(message.get("text", ""))] + [_link_text(u) for u in message.get("links", [])])
         source = {k: message[k] for k in ("space", "sender", "time") if message.get(k)}
         for raw in extract_urls(blob):
             info = classify(raw)

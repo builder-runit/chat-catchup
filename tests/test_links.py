@@ -86,6 +86,13 @@ class CollectTests(unittest.TestCase):
         found = links.collect([{"text": "Sign up here", "links": [SHEET], "space": "Build"}])
         self.assertEqual(found[0]["kind"], "gsheet")
 
+    def test_link_objects_from_the_browser_script_keep_their_tab(self):
+        # collect_links.js drops the query string and fragment, and returns the tab id separately.
+        items = [{"href": "https://docs.google.com/spreadsheets/d/1AbC_dEf-123/edit", "text": "Signups", "gid": "456"},
+                 {"href": "https://docs.google.com/spreadsheets/d/1AbC_dEf-123/edit", "text": "Signups"}]
+        found = links.collect([{"text": "", "links": items}])
+        self.assertEqual([(f["kind"], f.get("gid")) for f in found], [("gsheet", "456"), ("gsheet", None)])
+
     def test_ignores_junk_entries(self):
         self.assertEqual(links.collect([None, "text", {"text": None}]), [])
 
